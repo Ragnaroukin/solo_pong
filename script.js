@@ -54,6 +54,9 @@ function loop() {
     drawRect();
     drawBall();
     rafId = requestAnimationFrame(loop);
+    if (yBall > canvas.height - canvas.width / 30) {
+        cancelAnimationFrame(rafId);
+    }
 }
 
 // démarrer l'animation
