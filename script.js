@@ -1,12 +1,20 @@
 const canvas = document.getElementById('pong');
 const ctx = canvas.getContext('2d');
+let rightMove = document.getElementById('droite');
+let leftMove = document.getElementById('gauche');
+
 canvas.height = 1.5 * canvas.width;
 
 let xBall = canvas.width / 2;
 let yBall = canvas.height / 2;
+let xPad = canvas.width * 4 / 10;
+
 let speedX = -canvas.width/60;
 let speedY = -canvas.width/60;
+
 let rafId;
+
+let keysPressed = new Set();
 
 function roundRect(x, y, w, h, radius)
 {
@@ -23,8 +31,6 @@ function roundRect(x, y, w, h, radius)
   ctx.quadraticCurveTo(x, y, x+radius, y);
 }
 
-
-
 function drawBall() {
     ctx.fillStyle = "orange";
     ctx.beginPath();
@@ -35,8 +41,16 @@ function drawBall() {
 function drawRect() {
     ctx.fillStyle = "cyan";
     ctx.beginPath();
-    roundRect(canvas.width * 4 / 10, canvas.height - 20, canvas.width/5, canvas.width/30, canvas.width/60);
+    roundRect(xPad, canvas.height - 20, canvas.width/5, canvas.width/30, canvas.width/60);
     ctx.fill();
+}
+
+function rightMovePad() {
+    if (xPad + canvas.width/5 < canvas.width) xPad += canvas.width / 60;
+}
+
+function leftMovePad() {
+    if (xPad > 0) xPad -= canvas.width / 60;
 }
 
 function update() {
@@ -47,6 +61,10 @@ function update() {
 
     if (xBall > canvas.width - canvas.width / 30 || xBall < 0 + canvas.width / 30) speedX = -speedX;
     if (yBall < 0 + canvas.width / 30 ) speedY = -speedY;
+    if (xBall > xPad && xBall < xPad + canvas.width/5 && yBall > canvas.height - 20 - canvas.width / 30 && speedY >= 0) speedY = -speedY;
+
+    if (keysPressed.has('ArrowRight')) rightMovePad();
+    if (keysPressed.has('ArrowLeft')) leftMovePad();
 }
 
 function loop() {
@@ -59,15 +77,38 @@ function loop() {
     }
 }
 
+// Gestion des boutons
+
+
+let movementInterval;
+
+rightMove.addEventListener('touchstart', () => {
+    interval = setInterval(() => {
+        rightMovePad();
+    }, 25)
+});
+
+rightMove.addEventListener('touchend', () => {
+    clearInterval(movementInterval);
+});
+
+leftMove.addEventListener('touchstart', () => {
+    interval = setInterval(() => {
+        leftMovePad();
+    }, 25);
+});
+
+leftMove.addEventListener('touchend', () => {
+    clearInterval(movementInterval);
+});
+
+document.addEventListener('keydown', (e) => {
+    keysPressed.add(e.key);
+});
+
+document.addEventListener('keyup', (e) => {
+    keysPressed.delete(e.key);
+});
+
 // démarrer l'animation
 loop();
-
-//if (yBall > canvas.height - canvas.width / 30) {
-//        cancelAnimationFrame(rafId);
-//}
-
-// possibilité d'arrêter l'animation avec le bouton 'stop'
-//let stopAnimation = document.getElementById('stop');
-//stopAnimation.addEventListener('click', () => {
-//    cancelAnimationFrame(rafId)
-//})
