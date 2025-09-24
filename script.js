@@ -1,3 +1,4 @@
+// Constantes
 const canvas = document.getElementById('pong');
 const ctx = canvas.getContext('2d');
 const rightMove = document.getElementById('droite');
@@ -6,26 +7,35 @@ const newGame = document.getElementById('newGame');
 const score = document.getElementById('score');
 
 canvas.height = 1.5 * canvas.width;
+gauche.width = canvas.width / 3;
+gauche.height = canvas.width / 3;
 
+// Animation Frame
+let rafId;
+
+// Coordonnées
 let xBall = canvas.width / 2;
 let yBall = canvas.height / 2;
 let xPad = canvas.width * 4 / 10;
 
+// Vitesse
 let speedX = -canvas.width/100;
 let speedY = -canvas.width/100;
 let coeff = 1;
 let coeffX = randomCoeff();
 let coeffY = randomCoeff();
+let nbTouch = 0;
 
-let rafId;
-
+// Événements
 let keysPressed = new Set();
 let rightPressed = false;
 let leftPressed = false;
+
+// Score
 let interval;
 let time = 0;
-let nbTouch = 0;
 
+// Fonctions dessin
 function roundRect(x, y, w, h, radius)
 {
   var r = x + w;
@@ -42,10 +52,13 @@ function roundRect(x, y, w, h, radius)
 }
 
 function drawBall() {
-    ctx.fillStyle = "orange";
+    ctx.fillStyle = "black";
+    ctx.lineWidth = canvas.width / 75;
+    ctx.strokeStyle = "orange";
     ctx.beginPath();
     ctx.arc(xBall, yBall, canvas.width / 30, 0, Math.PI * 2);
     ctx.fill();
+    ctx.stroke();
 }
 
 function drawRect() {
@@ -55,6 +68,7 @@ function drawRect() {
     ctx.fill();
 }
 
+// Fonction déplacement
 function randomCoeff() {
     return (0.95 + Math.random() * 0.1) * coeff;
 }
@@ -67,6 +81,57 @@ function leftMovePad() {
     if (xPad > 0) xPad -= canvas.width / 60;
 }
 
+// Listener
+rightMove.addEventListener('touchstart', () => {
+    rightPressed = true;
+});
+
+rightMove.addEventListener('touchend', () => {
+    rightPressed = false;
+});
+
+leftMove.addEventListener('touchstart', () => {
+    leftPressed = true;
+});
+
+leftMove.addEventListener('touchend', () => {
+    leftPressed = false;
+});
+
+newGame.addEventListener('click', () => {
+    launch();
+})
+
+document.addEventListener('keydown', (e) => {
+    keysPressed.add(e.key);
+});
+
+document.addEventListener('keyup', (e) => {
+    keysPressed.delete(e.key);
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { 
+        launch();
+    }
+});
+
+// Fonctions Score
+function timer() {
+    interval = setInterval(() => {
+        time++;
+    },10);
+}
+
+function formatTime(time) {
+    let minutes = String(Math.floor(time / 6000)).padStart(2, '0');
+    let seconds = String(Math.floor(time / 100) % 60).padStart(2, '0');
+    let centiseconds = String(time % 100).padStart(2, '0');
+    return `${minutes}:${seconds}:${centiseconds}`;
+}
+
+
+// Gestion animation
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -114,52 +179,13 @@ function loop() {
     }
 }
 
-// Gestion des déplacements
-rightMove.addEventListener('touchstart', () => {
-    rightPressed = true;
-});
-
-rightMove.addEventListener('touchend', () => {
-    rightPressed = false;
-});
-
-leftMove.addEventListener('touchstart', () => {
-    leftPressed = true;
-});
-
-leftMove.addEventListener('touchend', () => {
-    leftPressed = false;
-});
-
-document.addEventListener('keydown', (e) => {
-    keysPressed.add(e.key);
-});
-
-document.addEventListener('keyup', (e) => {
-    keysPressed.delete(e.key);
-});
-
-// Gestion Score
-function timer() {
-    interval = setInterval(() => {
-        time++;
-    },10);
-}
-
-function formatTime(time) {
-    let minutes = String(Math.floor(time / 6000)).padStart(2, '0');
-    let seconds = String(Math.floor(time / 100) % 60).padStart(2, '0');
-    let centiseconds = String(time % 100).padStart(2, '0');
-    return `${minutes}:${seconds}:${centiseconds}`;
-}
-
-
-// Démarer l'animation
 function launch() {
     xBall = canvas.width / 2;
     yBall = canvas.height / 2;
     xPad = canvas.width * 4 / 10;
 
+    speedX = -canvas.width/100;
+    speedY = -canvas.width/100;
 
     coeff = 1;
     coeffX = randomCoeff();
@@ -173,21 +199,11 @@ function launch() {
     loop();
 }
 
-newGame.addEventListener('click', () => {
-    launch();
-})
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { 
-        launch();
-    }
-});
-
 // On vérifie si l'écran est tactile
-if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+//if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     gauche.hidden = false;
     droite.hidden = false;
-} else {
-    gauche.hidden = true;
-    droite.hidden = true;
-}
+//} else {
+//    gauche.hidden = true;
+//    droite.hidden = true;
+//}
