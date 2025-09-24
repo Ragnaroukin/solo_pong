@@ -11,8 +11,11 @@ let xBall = canvas.width / 2;
 let yBall = canvas.height / 2;
 let xPad = canvas.width * 4 / 10;
 
-let speedX = -canvas.width/60;
-let speedY = -canvas.width/60;
+let speedX = -canvas.width/100;
+let speedY = -canvas.width/100;
+let coeff = 1;
+let coeffX = randomCoeff();
+let coeffY = randomCoeff();
 
 let rafId;
 
@@ -21,6 +24,7 @@ let rightPressed = false;
 let leftPressed = false;
 let interval;
 let time = 0;
+let nbTouch = 0;
 
 function roundRect(x, y, w, h, radius)
 {
@@ -51,6 +55,10 @@ function drawRect() {
     ctx.fill();
 }
 
+function randomCoeff() {
+    return (0.95 + Math.random() * 0.1) * coeff;
+}
+
 function rightMovePad() {
     if (xPad + canvas.width/5 < canvas.width) xPad += canvas.width / 60;
 }
@@ -62,15 +70,33 @@ function leftMovePad() {
 function update() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    xBall += speedX;
-    yBall += speedY;
+    xBall += speedX * coeffX;
+    yBall += speedY * coeffY;
 
-    if (xBall > canvas.width - canvas.width / 30 || xBall < 0 + canvas.width / 30) speedX = -speedX;
-    if (yBall < 0 + canvas.width / 30 ) speedY = -speedY;
-    if (xBall > xPad && xBall < xPad + canvas.width/5 && yBall > canvas.height - 20 - canvas.width / 30 && speedY >= 0) speedY = -speedY;
+    if (xBall > canvas.width - canvas.width / 30 || xBall < 0 + canvas.width / 30) {
+        speedX = -speedX;
+        nbTouch++;
+    }
+
+    if (yBall < 0 + canvas.width / 30 ) {
+        speedY = -speedY;
+        nbTouch++;
+    }
+
+    if (xBall > xPad && xBall < xPad + canvas.width/5 && yBall > canvas.height - 20 - canvas.width / 30 && speedY >= 0) {
+        speedY = -speedY;
+        coeffX = randomCoeff();
+        coeffY = randomCoeff();
+        nbTouch++;
+    }
 
     if (keysPressed.has('ArrowRight') || rightPressed) rightMovePad();
     if (keysPressed.has('ArrowLeft') || leftPressed) leftMovePad();
+
+    if (nbTouch >= 10) {
+        nbTouch = 0;
+        coeff = (coeff < 2) ? 1.05 * coeff: 2;
+    }
 }
 
 function loop() {
@@ -78,14 +104,14 @@ function loop() {
     drawRect();
     drawBall();
 
+    score.innerHTML = formatTime(time);
+
     rafId = requestAnimationFrame(loop);
 
     if (yBall > canvas.height - canvas.width / 30) {
         cancelAnimationFrame(rafId);
+        clearInterval(interval);
     }
-
-    score.innerHTML = formatTime(time);
-    console.log(Math.floor(time / 6000)+':'+Math.floor(time / 100) % 60+':'+time % 100);
 }
 
 // Gestion des déplacements
@@ -134,10 +160,14 @@ function launch() {
     yBall = canvas.height / 2;
     xPad = canvas.width * 4 / 10;
 
-    speedX = -canvas.width/60;
-    speedY = -canvas.width/60;
+
+    coeff = 1;
+    coeffX = randomCoeff();
+    coeffY = randomCoeff();
 
     time = 0;
+    clearInterval(interval);
+    cancelAnimationFrame(rafId);
 
     timer();
     loop();
@@ -152,3 +182,12 @@ document.addEventListener('keydown', (e) => {
         launch();
     }
 });
+
+// On vérifie si l'écran est tactile
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    gauche.hidden = false;
+    droite.hidden = false;
+} else {
+    gauche.hidden = true;
+    droite.hidden = true;
+}
