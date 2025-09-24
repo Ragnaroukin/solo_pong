@@ -1,7 +1,9 @@
 const canvas = document.getElementById('pong');
 const ctx = canvas.getContext('2d');
-let rightMove = document.getElementById('droite');
-let leftMove = document.getElementById('gauche');
+const rightMove = document.getElementById('droite');
+const leftMove = document.getElementById('gauche');
+const newGame = document.getElementById('newGame');
+const score = document.getElementById('score');
 
 canvas.height = 1.5 * canvas.width;
 
@@ -15,6 +17,9 @@ let speedY = -canvas.width/60;
 let rafId;
 
 let keysPressed = new Set();
+let rightPressed = false;
+let leftPressed = false;
+let timer;
 
 function roundRect(x, y, w, h, radius)
 {
@@ -63,8 +68,8 @@ function update() {
     if (yBall < 0 + canvas.width / 30 ) speedY = -speedY;
     if (xBall > xPad && xBall < xPad + canvas.width/5 && yBall > canvas.height - 20 - canvas.width / 30 && speedY >= 0) speedY = -speedY;
 
-    if (keysPressed.has('ArrowRight')) rightMovePad();
-    if (keysPressed.has('ArrowLeft')) leftMovePad();
+    if (keysPressed.has('ArrowRight') || rightPressed) rightMovePad();
+    if (keysPressed.has('ArrowLeft') || leftPressed) leftMovePad();
 }
 
 function loop() {
@@ -77,29 +82,25 @@ function loop() {
     }
 }
 
-// Gestion des boutons
+// Gestion des déplacements
 
 
 let movementInterval;
 
 rightMove.addEventListener('touchstart', () => {
-    interval = setInterval(() => {
-        rightMovePad();
-    }, 25)
+    rightPressed = true;
 });
 
 rightMove.addEventListener('touchend', () => {
-    clearInterval(movementInterval);
+    rightPressed = false;
 });
 
 leftMove.addEventListener('touchstart', () => {
-    interval = setInterval(() => {
-        leftMovePad();
-    }, 25);
+    leftPressed = true;
 });
 
 leftMove.addEventListener('touchend', () => {
-    clearInterval(movementInterval);
+    leftPressed = false;
 });
 
 document.addEventListener('keydown', (e) => {
@@ -109,6 +110,9 @@ document.addEventListener('keydown', (e) => {
 document.addEventListener('keyup', (e) => {
     keysPressed.delete(e.key);
 });
+
+// Gestion Timer
+
 
 // démarrer l'animation
 loop();
