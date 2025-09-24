@@ -200,10 +200,10 @@ function launch() {
 }
 
 // On vérifie si l'écran est tactile
-//if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     gauche.hidden = false;
     droite.hidden = false;
-//} else {
-//    gauche.hidden = true;
-//    droite.hidden = true;
-//}
+} else {
+    gauche.hidden = true;
+    droite.hidden = true;
+}
