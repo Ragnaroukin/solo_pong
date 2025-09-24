@@ -19,7 +19,8 @@ let rafId;
 let keysPressed = new Set();
 let rightPressed = false;
 let leftPressed = false;
-let timer;
+let interval;
+let time = 0;
 
 function roundRect(x, y, w, h, radius)
 {
@@ -76,17 +77,18 @@ function loop() {
     update();
     drawRect();
     drawBall();
+
     rafId = requestAnimationFrame(loop);
+
     if (yBall > canvas.height - canvas.width / 30) {
         cancelAnimationFrame(rafId);
     }
+
+    score.innerHTML = formatTime(time);
+    console.log(Math.floor(time / 6000)+':'+Math.floor(time / 100) % 60+':'+time % 100);
 }
 
 // Gestion des déplacements
-
-
-let movementInterval;
-
 rightMove.addEventListener('touchstart', () => {
     rightPressed = true;
 });
@@ -111,8 +113,42 @@ document.addEventListener('keyup', (e) => {
     keysPressed.delete(e.key);
 });
 
-// Gestion Timer
+// Gestion Score
+function timer() {
+    interval = setInterval(() => {
+        time++;
+    },10);
+}
+
+function formatTime(time) {
+    let minutes = String(Math.floor(time / 6000)).padStart(2, '0');
+    let seconds = String(Math.floor(time / 100) % 60).padStart(2, '0');
+    let centiseconds = String(time % 100).padStart(2, '0');
+    return `${minutes}:${seconds}:${centiseconds}`;
+}
 
 
-// démarrer l'animation
-loop();
+// Démarer l'animation
+function launch() {
+    xBall = canvas.width / 2;
+    yBall = canvas.height / 2;
+    xPad = canvas.width * 4 / 10;
+
+    speedX = -canvas.width/60;
+    speedY = -canvas.width/60;
+
+    time = 0;
+
+    timer();
+    loop();
+}
+
+newGame.addEventListener('click', () => {
+    launch();
+})
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { 
+        launch();
+    }
+});
