@@ -18,3 +18,8 @@
 #score {
     font-size: 1.5rem;
 }
+
+#highscore {
+    font-size: 1.8rem;
+    text-decoration: underline;
+}

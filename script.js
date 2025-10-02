@@ -5,6 +5,7 @@ const rightMove = document.getElementById('droite');
 const leftMove = document.getElementById('gauche');
 const newGame = document.getElementById('newGame');
 const score = document.getElementById('score');
+const labelHighscore = document.getElementById('highscore');
 
 canvas.height = 1.5 * canvas.width;
 gauche.width = canvas.width / 3;
@@ -15,7 +16,7 @@ let rafId;
 
 // Coordonnées
 let xBall = canvas.width / 2;
-let yBall = canvas.height / 2;
+let yBall = canvas.height - 20 - canvas.width / 30;
 let xPad = canvas.width * 4 / 10;
 
 // Vitesse
@@ -34,6 +35,10 @@ let leftPressed = false;
 // Score
 let interval;
 let time = 0;
+localStorage.setItem("highscore", 0);
+
+// Image
+let img = new Image();
 
 // Fonctions dessin
 function roundRect(x, y, w, h, radius)
@@ -130,6 +135,18 @@ function formatTime(time) {
     return `${minutes}:${seconds}:${centiseconds}`;
 }
 
+function highScore() {
+    if (time > localStorage.getItem("highscore")) localStorage.setItem("highscore", time);
+}
+
+// Gestion défaite
+function looser() {
+
+    img.src = "./img/looser.jpg";
+    img.onload = function() {
+        ctx.drawImage(img, 0, canvas.height/4, canvas.width, canvas.width / 2); 
+    };
+}
 
 // Gestion animation
 function update() {
@@ -169,22 +186,25 @@ function loop() {
     drawRect();
     drawBall();
 
-    score.innerHTML = formatTime(time);
+    highScore();
+    score.innerHTML = "Score : "+formatTime(time);
+    labelHighscore.innerHTML = "Highscore : "+formatTime(localStorage.getItem("highscore"));
 
     rafId = requestAnimationFrame(loop);
 
     if (yBall > canvas.height - canvas.width / 30) {
         cancelAnimationFrame(rafId);
         clearInterval(interval);
+        looser();
     }
 }
 
 function launch() {
     xBall = canvas.width / 2;
-    yBall = canvas.height / 2;
+    yBall = canvas.height - 20 - canvas.width / 30 - canvas.width / 75;
     xPad = canvas.width * 4 / 10;
 
-    speedX = -canvas.width/100;
+    speedX = -canvas.width/100   * ((Math.random() > 0.5) ? 1 : -1);
     speedY = -canvas.width/100;
 
     coeff = 1;
@@ -207,3 +227,6 @@ if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
     gauche.hidden = true;
     droite.hidden = true;
 }
+
+drawRect();
+drawBall();
